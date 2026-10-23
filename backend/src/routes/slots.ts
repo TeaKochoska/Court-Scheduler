@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { SlotService, BOOKING_TYPES, BookingType } from '../services/slotService.js';
+import { generateConfirmationMessage } from '../services/aiService.js';
 
 const router = Router();
 
@@ -106,29 +107,8 @@ router.post('/:id/book',async (req:Request, res:Response) => {
             return;
         }
 
-        res.json(updatedSlot);
-    }catch(err){
-        console.error(err);
-        res.status(500).json({error: 'Internal Server Error'});
-    }
-});
-
-//PATCH /slots/:id/cancel
-router.patch('/:id/cancel', async (req:Request, res:Response) => {
-    const id = String(req.params.id);
-
-    if(!isValidId(id)){
-        res.status(400).json({error: 'Invalid slot ID'});
-        return;
-    }
-
-    try{
-        const slot = await SlotService.cancelBooking(id);
-        if(!slot){
-            res.status(404).json({error: 'Active booking not found or slot already started'});
-            return;
-        }
-        res.json(slot);
+        const confirmationMessage = await generateConfirmationMessage(updatedSlot);
+        res.json({ ...updatedSlot, confirmationMessage });
     }catch(err){
         console.error(err);
         res.status(500).json({error: 'Internal Server Error'});

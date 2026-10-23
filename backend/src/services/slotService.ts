@@ -98,22 +98,6 @@ export const SlotService = {
         return rows[0] || null;
     },
 
-    async cancelBooking(id: string) {
-        const {rows} = await pool.query<Slot>(
-            `UPDATE slots
-            SET is_booked = false,
-                team_name = null,
-                booking_type = null,
-                players_count = null,
-                contact_name = null,
-                contact_email = null
-            WHERE id = $1 AND is_booked = true AND start_time > now()
-            RETURNING ${COLUMNS}`,
-            [id]
-        );
-        return rows[0] || null;
-    },
-
     async deleteSlot(id: string) {
         const {rows} = await pool.query(
             `DELETE FROM slots WHERE id = $1 AND is_booked = false RETURNING id`,
